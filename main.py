@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 import ast
 import sys
 import astunparse
@@ -6,7 +8,11 @@ import openai
 from dotenv import load_dotenv
 from pathlib import Path
 
-load_dotenv()
+script_path = os.path.realpath(__file__)
+script_directory = os.path.dirname(script_path)
+env_path = os.path.join(script_directory, '.env')
+load_dotenv(dotenv_path=env_path)
+
 
 FILENAME = 'tests.py'
 
@@ -23,8 +29,9 @@ def extract_functions(file_path):
         
     return function_code_list
 
-def test_file_init(py_file):
+def test_file_init(file_path):
     path = Path(FILENAME)
+    py_file = os.path.basename(file_path)
     if path.is_file() == 0:
         with open(path, 'w') as file:
             file.write(f'import unittest\nfrom {py_file[:-3]} import *\n')
@@ -60,7 +67,9 @@ def main():
         print("Usage: python extract_functions.py <python_file>")
         return
     
-    file_path = sys.argv[1]
+    file_name = sys.argv[1]
+    file_path = f"{os.getcwd()}/{file_name}"
+    
     functions_list = extract_functions(file_path)
     
     test_list = generate_tests(functions_list)
